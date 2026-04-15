@@ -1,6 +1,5 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
-import configuration from "../../src/config/configuration";
 
 const env = process.env;
 

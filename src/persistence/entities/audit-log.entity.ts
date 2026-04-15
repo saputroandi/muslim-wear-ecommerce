@@ -12,7 +12,7 @@ export class AuditLog {
   action!: string;
 
   @Column({ name: "metadata", type: "json", nullable: true })
-  metadata?: any;
+  metadata?: Record<string, unknown> | null;
 
   @CreateDateColumn({ name: "created_at" })
   createdAt!: Date;
