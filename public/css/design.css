@@ -1,19 +1,13 @@
 :root {
-  --color-void: #000000;
-  --color-deep-teal: #02090a;
-  --color-dark-forest: #061a1c;
-  --color-forest: #102620;
-  --color-text: #ffffff;
-  --color-muted: #a1a1aa;
-  --color-border-dark: #1e2c31;
-  --color-accent-neon: #36f4a4;
-  --color-aloe: #c1fbd4;
-  --shadow-card:
-    rgba(0, 0, 0, 0.1) 0 0 0 1px,
-    rgba(0, 0, 0, 0.1) 0 2px 2px,
-    rgba(0, 0, 0, 0.1) 0 4px 4px,
-    rgba(0, 0, 0, 0.1) 0 8px 8px,
-    rgba(255, 255, 255, 0.03) 0 1px 0 inset;
+  /* Light theme tokens (adapted from DESIGN.md) */
+  --color-page-bg: #F7F9F8; /* neutral soft */
+  --color-surface: #FFFFFF; /* card surface */
+  --color-section-tint: #F1FBF5; /* soft Aloe tint */
+  --color-text-primary: #111827; /* dark readable text */
+  --color-text-muted: #6B7280; /* metadata */
+  --color-border: #E4E4E7; /* light border */
+  --color-accent-neon: #36F4A4; /* preserved accent */
+  --shadow-card: rgba(16, 24, 40, 0.04) 0px 1px 2px, rgba(16, 24, 40, 0.06) 0px 6px 12px;
 }
 
 *,
@@ -24,14 +18,14 @@
 
 body {
   margin: 0;
-  color: var(--color-text);
-  background: radial-gradient(circle at 20% 0%, var(--color-forest) 0%, var(--color-deep-teal) 35%, var(--color-void) 100%);
+  color: var(--color-text-primary);
+  background: var(--color-page-bg);
   font-family: Inter, "Helvetica Neue", Arial, sans-serif;
   line-height: 1.56;
 }
 
 a {
-  color: var(--color-text);
+  color: inherit;
 }
 
 .container {
@@ -43,9 +37,9 @@ a {
   position: sticky;
   top: 0;
   z-index: 10;
-  backdrop-filter: blur(8px);
-  background: rgba(16, 38, 32, 0.6);
-  border-bottom: 1px solid var(--color-border-dark);
+  backdrop-filter: blur(6px);
+  background: rgba(255,255,255,0.8);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .nav-inner {
@@ -60,12 +54,19 @@ a {
   font-size: 20px;
   letter-spacing: 0.4px;
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
+  color: var(--color-text-primary);
 }
 
 .nav-links {
   display: flex;
   gap: 16px;
+}
+
+.nav-links a {
+  color: var(--color-text-primary);
+  text-decoration: none;
+  font-weight: 500;
 }
 
 .pill-button {
@@ -78,18 +79,19 @@ a {
 }
 
 .pill-button:focus-visible {
-  outline: 2px solid var(--color-accent-neon);
+  outline: 3px solid var(--color-accent-neon);
   outline-offset: 2px;
 }
 
 .pill-button.primary {
-  background: #ffffff;
-  color: #000000;
+  background: var(--color-accent-neon);
+  color: #07221a; /* dark text on neon */
 }
 
 .pill-button.secondary {
-  border-color: #ffffff;
-  color: #ffffff;
+  border-color: var(--color-border);
+  color: var(--color-text-primary);
+  background: transparent;
 }
 
 .hero {
@@ -101,15 +103,16 @@ a {
   font-size: clamp(48px, 8vw, 96px);
   line-height: 1;
   font-family: "Neue Haas Grotesk", "Helvetica Neue", Arial, sans-serif;
-  font-weight: 330;
+  font-weight: 400;
   letter-spacing: 0.4px;
   font-feature-settings: "ss03" on;
+  color: var(--color-text-primary);
 }
 
 .subtitle {
   max-width: 740px;
   margin-top: 24px;
-  color: var(--color-muted);
+  color: var(--color-text-muted);
   font-size: 20px;
 }
 
@@ -127,8 +130,9 @@ a {
 .section-title {
   margin-bottom: 20px;
   font-size: clamp(28px, 4vw, 48px);
-  font-weight: 330;
+  font-weight: 560;
   font-family: "Neue Haas Grotesk", "Helvetica Neue", Arial, sans-serif;
+  color: var(--color-text-primary);
 }
 
 .cards {
@@ -138,9 +142,9 @@ a {
 }
 
 .card {
-  border: 1px solid var(--color-border-dark);
+  border: 1px solid var(--color-border);
   border-radius: 12px;
-  background: var(--color-deep-teal);
+  background: var(--color-surface);
   box-shadow: var(--shadow-card);
   padding: 20px;
 }
@@ -149,11 +153,12 @@ a {
   margin-top: 0;
   margin-bottom: 10px;
   font-size: 24px;
-  font-weight: 360;
+  font-weight: 600;
+  color: var(--color-text-primary);
 }
 
 .muted {
-  color: var(--color-muted);
+  color: var(--color-text-muted);
 }
 
 .badge {
@@ -162,8 +167,10 @@ a {
   border-radius: 9999px;
   font-size: 12px;
   letter-spacing: 0.72px;
-  border: 1px solid var(--color-border-dark);
+  border: 1px solid var(--color-border);
   text-transform: uppercase;
+  background: var(--color-section-tint);
+  color: var(--color-text-primary);
 }
 
 .list {
