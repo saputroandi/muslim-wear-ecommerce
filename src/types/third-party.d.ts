@@ -1,8 +1,8 @@
 declare module "connect-pg-simple" {
-  import session = require("express-session");
-  function PgSession(options?: any): any;
-  namespace PgSession {}
-  export = PgSession;
+  import type * as session from "express-session";
+  // lightweight typing: factory that returns a constructor-like function for store
+  function ConnectPgSimple(s: typeof session): (opts?: Record<string, unknown>) => unknown;
+  export = ConnectPgSimple;
 }
 
 // fallback for any other untyped third-party libs used
