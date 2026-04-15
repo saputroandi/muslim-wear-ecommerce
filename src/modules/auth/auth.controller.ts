@@ -24,12 +24,28 @@ export class AuthController {
       return res.render("auth/login", { error: "Email atau password salah" });
     }
 
-    // set session
-    if (!req.session) req.session = {} as any;
-    req.session.adminUserId = admin.id;
-    req.session.lastActivityAt = new Date().toISOString();
-
-    return res.redirect("/admin");
+    // regenerate session to prevent session fixation
+    if (req.session && typeof req.session.regenerate === "function") {
+      req.session.regenerate((err: any) => {
+        if (err) {
+          console.error("Session regenerate error", err);
+          // fallback: set session values directly
+          req.session = req.session || {};
+          req.session.adminUserId = admin.id;
+          req.session.lastActivityAt = new Date().toISOString();
+          return res.redirect("/admin");
+        }
+        req.session.adminUserId = admin.id;
+        req.session.lastActivityAt = new Date().toISOString();
+        // ensure session is saved before redirect
+        req.session.save?.(() => res.redirect("/admin"));
+      });
+    } else {
+      req.session = req.session || {};
+      req.session.adminUserId = admin.id;
+      req.session.lastActivityAt = new Date().toISOString();
+      return res.redirect("/admin");
+    }
   }
 
   @Post("auth/logout")
