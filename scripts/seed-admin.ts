@@ -1,9 +1,10 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
-import dotenv from "dotenv";
-import bcrypt from "bcryptjs";
+import * as dotenv from "dotenv";
+import * as bcrypt from "bcryptjs";
 import { AdminUser } from "../src/persistence/entities/admin-user.entity";
 
+// Use universal import style to work under ts-node/commonjs
 dotenv.config();
 
 const ds = new DataSource({
