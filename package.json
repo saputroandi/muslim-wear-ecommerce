@@ -14,7 +14,9 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "seed:admin": "ts-node scripts/seed-admin.ts"
+    "seed:admin": "ts-node scripts/seed-admin.ts",
+    "migration:run": "ts-node scripts/run-migrations.ts",
+    "migration:revert": "ts-node scripts/revert-migrations.ts"
   },
 
   "repository": {
