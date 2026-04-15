@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{appName}} - Admin</title>
+    <link rel="stylesheet" href="/css/design.css" />
+  </head>
+  <body>
+    <header class="nav">
+      <div class="container nav-inner">
+        <a class="brand" href="/">{{appName}}</a>
+        <nav class="nav-links">
+          <a href="/products">Produk</a>
+          <a href="/admin">Admin</a>
+          <a href="/health">Health</a>
+        </nav>
+        <a class="pill-button secondary" href="/">Storefront</a>
+      </div>
+    </header>
+
+    <main class="section container">
+      <span class="badge">Single-admin ready</span>
+      <h1 class="section-title">{{title}}</h1>
+      <p class="subtitle">{{intro}}</p>
+      <article class="card">
+        <h3>Starter scope</h3>
+        <ul class="list">
+          {{#each starterScopes}}
+            <li>{{this}}</li>
+          {{/each}}
+        </ul>
+      </article>
+    </main>
+  </body>
+</html>
+

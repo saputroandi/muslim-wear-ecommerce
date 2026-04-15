@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{appName}} - Starter</title>
+    <link rel="stylesheet" href="/css/design.css" />
+  </head>
+  <body>
+    <header class="nav">
+      <div class="container nav-inner">
+        <a class="brand" href="/">{{appName}}</a>
+        <nav class="nav-links">
+          <a href="/products">Produk</a>
+          <a href="/admin">Admin</a>
+          <a href="/health">Health</a>
+        </nav>
+        <a class="pill-button primary" href="/admin">Admin Panel</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero container">
+        <span class="badge">Starter Project</span>
+        <h1 class="headline">{{headline}}</h1>
+        <p class="subtitle">{{subtitle}}</p>
+        <div class="cta-row">
+          <a class="pill-button primary" href="/products">Lihat Produk</a>
+          <a class="pill-button secondary" href="/admin">Lihat Admin</a>
+        </div>
+      </section>
+
+      <section class="section container">
+        <h2 class="section-title">Preview katalog awal</h2>
+        <div class="cards">
+          {{#each featuredProducts}}
+            <article class="card">
+              <p class="badge">{{this.category}}</p>
+              <h3>{{this.name}}</h3>
+              <p class="muted">{{this.priceLabel}}</p>
+            </article>
+          {{/each}}
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
+

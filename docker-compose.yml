@@ -1,0 +1,43 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: muslim-wear-app
+    environment:
+      NODE_ENV: development
+      APP_NAME: Muslim Wear Ecommerce
+      APP_PORT: 3000
+      APP_URL: http://localhost:3000
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: muslim_wear
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_SYNCHRONIZE: "false"
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    container_name: muslim-wear-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: muslim_wear
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d muslim_wear"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+
