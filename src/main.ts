@@ -3,10 +3,8 @@ import { NestFactory } from "@nestjs/core";
 import { type NestExpressApplication } from "@nestjs/platform-express";
 import { join } from "node:path";
 import { AppModule } from "./app.module";
-const expressSessionModule = require("express-session");
-// connect-pg-simple may export differently depending on CJS/ESM interop in build
-// use require() at runtime to avoid "is not a function" errors in compiled output
-const connectPgSimpleModule = require("connect-pg-simple");
+import session from "express-session";
+import connectPgSimple from "connect-pg-simple";
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -20,9 +18,17 @@ async function bootstrap(): Promise<void> {
     })
   );
 
-  const sessionMiddleware = expressSessionModule.default ?? expressSessionModule;
-  const connectPgSimpleFactory = connectPgSimpleModule.default ?? connectPgSimpleModule;
-  const PgSession = connectPgSimpleFactory(sessionMiddleware);
+  // normalize imports for runtime interop while keeping TS imports
+
+  const factoryUnknown = connectPgSimple as unknown;
+  let PgSessionCtor: unknown;
+  if (typeof (factoryUnknown as { default?: unknown }).default === "function") {
+    PgSessionCtor = (factoryUnknown as { default: (s: unknown) => unknown }).default(session);
+  } else if (typeof factoryUnknown === "function") {
+    PgSessionCtor = (factoryUnknown as (s: unknown) => unknown)(session);
+  } else {
+    throw new Error("connect-pg-simple import is not a function");
+  }
 
   const dbHost = process.env.DB_HOST ?? "localhost";
   const dbPort = process.env.DB_PORT ?? "5432";
@@ -34,25 +40,35 @@ async function bootstrap(): Promise<void> {
   const conString = `postgres://${dbUser}:${dbPassword}@${dbHost}:${dbPort}/${dbName}`;
 
   // Configure session store with explicit table name and auto-create
-  const sessionStoreOptions = {
+  const sessionStoreOptions: Record<string, unknown> = {
     conString,
     tableName: process.env.SESSION_TABLE_NAME ?? "user_sessions",
     createTableIfMissing: true
-  } as any;
+  };
+
+  // create store instance from resolved constructor-like value
+  type PgStoreCtor = new (opts?: Record<string, unknown>) => Record<string, unknown>;
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  const PgStoreConstructor = PgSessionCtor as unknown as PgStoreCtor;
 
   app.use(
-    sessionMiddleware({
-      store: new PgSession(sessionStoreOptions),
-      secret: sessionSecret,
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        maxAge: 1000 * 60 * 30, // 30 minutes
-        httpOnly: true,
-        sameSite: "lax",
-        secure: process.env.NODE_ENV === "production"
-      }
-    }) as any
+    session(
+      {
+        // runtime store constructor; typed as unknown then narrowed
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore: runtime factory
+        store: (new PgStoreConstructor(sessionStoreOptions) as unknown) as import("express-session").Store,
+        secret: sessionSecret,
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+          maxAge: 1000 * 60 * 30, // 30 minutes
+          httpOnly: true,
+          sameSite: "lax",
+          secure: process.env.NODE_ENV === "production"
+        }
+      } as import("express-session").SessionOptions
+    ) as unknown as import("express").RequestHandler
   );
 
   app.useStaticAssets(join(process.cwd(), "public"));
