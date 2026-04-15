@@ -33,9 +33,16 @@ async function bootstrap(): Promise<void> {
 
   const conString = `postgres://${dbUser}:${dbPassword}@${dbHost}:${dbPort}/${dbName}`;
 
+  // Configure session store with explicit table name and auto-create
+  const sessionStoreOptions = {
+    conString,
+    tableName: process.env.SESSION_TABLE_NAME ?? "user_sessions",
+    createTableIfMissing: true
+  } as any;
+
   app.use(
     sessionMiddleware({
-      store: new PgSession({ conString }),
+      store: new PgSession(sessionStoreOptions),
       secret: sessionSecret,
       resave: false,
       saveUninitialized: false,
