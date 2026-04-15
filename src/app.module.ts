@@ -15,6 +15,8 @@ import { StorefrontModule } from "./modules/storefront/storefront.module";
 import { AdminUser } from "./persistence/entities/admin-user.entity";
 import { Order } from "./persistence/entities/order.entity";
 import { Product } from "./persistence/entities/product.entity";
+import { AuditLog } from "./persistence/entities/audit-log.entity";
+import { PasswordResetToken } from "./persistence/entities/password-reset-token.entity";
 
 @Module({
   imports: [
@@ -32,7 +34,7 @@ import { Product } from "./persistence/entities/product.entity";
         database: configService.get<string>("database.name", "muslim_wear"),
         username: configService.get<string>("database.user", "postgres"),
         password: configService.get<string>("database.password", "postgres"),
-        entities: [AdminUser, Product, Order],
+        entities: [AdminUser, Product, Order, AuditLog, PasswordResetToken],
         synchronize: configService.get<boolean>("database.synchronize", false),
         logging: configService.get<string>("app.nodeEnv", "development") === "development"
       })
