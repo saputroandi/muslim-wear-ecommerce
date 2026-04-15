@@ -4,7 +4,9 @@ import { type NestExpressApplication } from "@nestjs/platform-express";
 import { join } from "node:path";
 import { AppModule } from "./app.module";
 import session from "express-session";
-import connectPgSimple from "connect-pg-simple";
+// connect-pg-simple may export differently depending on CJS/ESM interop in build
+// use require() at runtime to avoid "is not a function" errors in compiled output
+const connectPgSimple = require("connect-pg-simple");
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
