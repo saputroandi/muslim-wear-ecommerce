@@ -42,8 +42,11 @@
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
     "typeorm": "^0.3.28",
-    "bcryptjs": "^2.4.3"
+    "bcryptjs": "^2.4.3",
+    "express-session": "^1.17.4",
+    "connect-pg-simple": "^8.0.0"
   },
+
   "devDependencies": {
     "@eslint/js": "^9.39.4",
     "@nestjs/cli": "^11.0.19",
