@@ -2,6 +2,14 @@ import { Controller, Get, Post, Body, Render, Req, Res } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { Request, Response } from "express";
 
+interface AdminSession {
+  adminUserId?: string;
+  lastActivityAt?: string;
+  regenerate?: (cb: (err?: unknown) => void) => void;
+  save?: (cb?: () => void) => void;
+  destroy?: (cb?: () => void) => void;
+}
+
 @Controller()
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -15,7 +23,7 @@ export class AuthController {
   @Post("auth/login")
   async login(
     @Body() body: { email: string; password: string },
-    @Req() req: Request & { session?: any },
+    @Req() req: Request & { session?: AdminSession },
     @Res() res: Response
   ) {
     const { email, password } = body;
@@ -26,7 +34,7 @@ export class AuthController {
 
     // regenerate session to prevent session fixation
     if (req.session && typeof req.session.regenerate === "function") {
-      req.session.regenerate((err: any) => {
+      req.session.regenerate((err?: unknown) => {
         if (err) {
           console.error("Session regenerate error", err);
           // fallback: set session values directly
@@ -49,7 +57,7 @@ export class AuthController {
   }
 
   @Post("auth/logout")
-  logout(@Req() req: Request & { session?: any }, @Res() res: Response) {
+  logout(@Req() req: Request & { session?: AdminSession }, @Res() res: Response) {
     if (req.session) {
       req.session.destroy?.(() => {
         res.clearCookie("connect.sid");
