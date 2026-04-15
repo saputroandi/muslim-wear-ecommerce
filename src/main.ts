@@ -6,7 +6,7 @@ import { AppModule } from "./app.module";
 import session from "express-session";
 // connect-pg-simple may export differently depending on CJS/ESM interop in build
 // use require() at runtime to avoid "is not a function" errors in compiled output
-const connectPgSimple = require("connect-pg-simple");
+const connectPgSimpleModule = require("connect-pg-simple");
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -20,7 +20,8 @@ async function bootstrap(): Promise<void> {
     })
   );
 
-  const PgSession = connectPgSimple(session as any);
+  const connectPgSimpleFactory = connectPgSimpleModule.default ?? connectPgSimpleModule;
+  const PgSession = connectPgSimpleFactory(session as any);
 
   const dbHost = process.env.DB_HOST ?? "localhost";
   const dbPort = process.env.DB_PORT ?? "5432";
