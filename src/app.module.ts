@@ -5,6 +5,7 @@ import configuration from "./config/configuration";
 import { envValidationSchema } from "./config/env.validation";
 import { AdminModule } from "./modules/admin/admin.module";
 import { AuthModule } from "./modules/auth/auth.module";
+import { AuditModule } from "./modules/audit/audit.module";
 import { CatalogModule } from "./modules/catalog/catalog.module";
 import { CheckoutModule } from "./modules/checkout/checkout.module";
 import { HealthModule } from "./modules/health/health.module";

@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body, Render, Req, Res } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { Request, Response } from "express";
+import { AuditLogService } from "../audit/audit-log.service";
 
 interface AdminSession {
   adminUserId?: string;
@@ -12,7 +13,7 @@ interface AdminSession {
 
 @Controller()
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService, private readonly auditLogService: AuditLogService) {}
 
   @Get("auth/login")
   @Render("auth/login")
@@ -31,7 +32,20 @@ export class AuthController {
     const { email, password } = body;
     const admin = await this.authService.validateAdmin(email, password);
     if (!admin) {
+      // record failed login (do not include password)
+      try {
+        await this.auditLogService.record(null, 'login_failed', { email, ip: req.ip });
+      } catch (err) {
+        console.error('Audit log failed', err);
+      }
       return res.render("auth/login", { error: "Email atau password salah" });
+    }
+
+    // record successful login
+    try {
+      await this.auditLogService.record(admin.id, 'login_success', { ip: req.ip });
+    } catch (err) {
+      console.error('Audit log failed', err);
     }
 
     // regenerate session to prevent session fixation
@@ -59,8 +73,15 @@ export class AuthController {
   }
 
   @Post("auth/logout")
-  logout(@Req() req: Request & { session?: AdminSession }, @Res() res: Response) {
+  async logout(@Req() req: Request & { session?: AdminSession }, @Res() res: Response) {
     if (req.session) {
+      // record logout
+      try {
+        await this.auditLogService.record(req.session.adminUserId || null, 'logout', { ip: req.ip });
+      } catch (err) {
+        console.error('Audit log failed', err);
+      }
+
       req.session.destroy?.(() => {
         res.clearCookie("connect.sid");
         return res.redirect("/auth/login");
