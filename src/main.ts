@@ -7,6 +7,8 @@ import * as session from "express-session";
 import * as cookieParser from "cookie-parser";
 import { createRateLimiter } from "./middleware/rate-limiter";
 import { csrfMiddleware } from "./middleware/csrf.middleware";
+import { csrfDebugMiddleware } from "./middleware/csrf-debug.middleware";
+import * as express from "express";
 
 type ConnectPgSimpleFactory = (session: typeof import("express-session")) => new (
   opts?: Record<string, unknown>
@@ -49,6 +51,28 @@ async function bootstrap(): Promise<void> {
     createTableIfMissing: true,
   });
 
+  const sessionDebug = ["1", "true", "yes"].includes((process.env.SESSION_DEBUG ?? "").toLowerCase());
+  if (sessionDebug) {
+    const storeWithEvents = store as unknown as {
+      on?: (event: string, listener: (...args: unknown[]) => void) => void;
+    };
+
+    storeWithEvents.on?.("connect", () => console.log("[Session] store connected"));
+    storeWithEvents.on?.("disconnect", () => console.log("[Session] store disconnected"));
+    storeWithEvents.on?.("error", (err: unknown) => console.error("[Session] store error:", err));
+  }
+
+  const secureCookieEnv = (process.env.SESSION_COOKIE_SECURE ?? "").toLowerCase();
+  const secureCookie =
+    secureCookieEnv === "1" ||
+    secureCookieEnv === "true" ||
+    secureCookieEnv === "yes" ||
+    (secureCookieEnv === "" && process.env.NODE_ENV === "production");
+
+  // Ensure form POST bodies are parsed BEFORE CSRF validation middleware reads req.body
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
+
   app.use(cookieParser());
   app.use(
     session({
@@ -60,10 +84,13 @@ async function bootstrap(): Promise<void> {
         maxAge: 1000 * 60 * 30,
         httpOnly: true,
         sameSite: "lax",
-        secure: process.env.NODE_ENV === "production",
+        secure: secureCookie,
       },
     })
   );
+
+  // Optional diagnostics for CSRF/session issues. Enable with CSRF_DEBUG=1
+  app.use(csrfDebugMiddleware);
 
   app.use("/auth", csrfMiddleware);
   app.use("/api/admin", csrfMiddleware);
