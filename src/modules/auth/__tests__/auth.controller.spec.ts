@@ -10,10 +10,8 @@ describe('AuthController (unit)', () => {
     // construct a controller-like object using same methods
     // import original class dynamically to avoid DI
     const { AuthController } = await import('../../auth/auth.controller');
-    // create instance with audit via prototype injection
-    const ctrl: any = new AuthController((authService as any) /* will be replaced */);
-    // attach auditLogService if present
-    (ctrl as any).auditLogService = auditService;
+    // create instance with mocked services
+    const ctrl: any = new AuthController((authService as any), (auditService as any));
 
     const req = makeReq();
     const res = makeRes();
@@ -29,8 +27,7 @@ describe('AuthController (unit)', () => {
     const authService: any = { validateAdmin: jest.fn().mockResolvedValue(admin) };
     const auditService: any = { record: jest.fn().mockResolvedValue(null) };
     const { AuthController } = await import('../../auth/auth.controller');
-    const ctrl: any = new AuthController((authService as any));
-    (ctrl as any).auditLogService = auditService;
+    const ctrl: any = new AuthController((authService as any), (auditService as any));
 
     const req: any = { session: { regenerate: (cb: any) => cb() }, ip: '127.0.0.1' };
     const res: any = { redirect: jest.fn(), render: jest.fn() };

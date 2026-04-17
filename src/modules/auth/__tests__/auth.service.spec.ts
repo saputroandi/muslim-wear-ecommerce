@@ -19,18 +19,18 @@ describe('AuthService (unit)', () => {
     const svc = new AuthService(adminRepo, tokenRepo as any);
 
     const token = await svc.createPasswordResetToken('a@b.c', 1);
-    expect(typeof token).toBe('string');
+    expect(token).toBeTruthy();
 
     // invalid token should fail
     const bad = await svc.resetPassword('a@b.c', 'wrong', 'newpass');
     expect(bad).toBe(false);
 
     // valid token should succeed
-    const ok = await svc.resetPassword('a@b.c', token, 'newpass');
+    const ok = await svc.resetPassword('a@b.c', token!, 'newpass');
     expect(ok).toBe(true);
 
     // subsequent use should fail
-    const again = await svc.resetPassword('a@b.c', token, 'x');
+    const again = await svc.resetPassword('a@b.c', token!, 'x');
     expect(again).toBe(false);
   });
 });
