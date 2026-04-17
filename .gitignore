@@ -11,3 +11,4 @@ pnpm-debug.log*
 # Ignore markdown files except README.md (keep README tracked)
 *.md
 !README.md
+issue.md
