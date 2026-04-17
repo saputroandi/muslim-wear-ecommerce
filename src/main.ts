@@ -5,6 +5,8 @@ import { join } from "node:path";
 import { AppModule } from "./app.module";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
+import { createRateLimiter } from "./middleware/rate-limiter";
+import { csrfMiddleware } from "./middleware/csrf.middleware";
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -70,6 +72,13 @@ async function bootstrap(): Promise<void> {
       } as import("express-session").SessionOptions
     ) as unknown as import("express").RequestHandler
   );
+
+  // CSRF middleware for auth routes and attach csrfToken to res.locals for templates
+  app.use('/auth', csrfMiddleware);
+
+  // Rate limit important endpoints (in-memory limiter)
+  app.use('/auth/login', createRateLimiter({ windowMs: 15 * 60_000, max: 6 }));
+  app.use('/auth/forgot-password', createRateLimiter({ windowMs: 15 * 60_000, max: 3 }));
 
   app.useStaticAssets(join(process.cwd(), "public"));
   app.setBaseViewsDir(join(process.cwd(), "views"));
