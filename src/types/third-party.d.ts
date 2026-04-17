@@ -1,8 +1,9 @@
 declare module "connect-pg-simple" {
-  import type * as session from "express-session";
-  // lightweight typing: factory that returns a constructor-like function for store
-  function ConnectPgSimple(s: typeof session): (opts?: Record<string, unknown>) => unknown;
-  export = ConnectPgSimple;
+  import type session from "express-session";
+  type StoreConstructor = new (opts?: Record<string, unknown>) => session.Store;
+  type ConnectPgSimpleFactory = (s: typeof session) => StoreConstructor;
+  const connectPgSimple: ConnectPgSimpleFactory;
+  export default connectPgSimple;
 }
 
 // fallback for any other untyped third-party libs used

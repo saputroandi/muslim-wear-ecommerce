@@ -3,10 +3,14 @@ import { NestFactory } from "@nestjs/core";
 import { type NestExpressApplication } from "@nestjs/platform-express";
 import { join } from "node:path";
 import { AppModule } from "./app.module";
-import session from "express-session";
-import connectPgSimple from "connect-pg-simple";
+import * as session from "express-session";
+import * as cookieParser from "cookie-parser";
 import { createRateLimiter } from "./middleware/rate-limiter";
 import { csrfMiddleware } from "./middleware/csrf.middleware";
+
+type ConnectPgSimpleFactory = (session: typeof import("express-session")) => new (
+  opts?: Record<string, unknown>
+) => import("express-session").Store;
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -16,21 +20,9 @@ async function bootstrap(): Promise<void> {
     new ValidationPipe({
       transform: true,
       whitelist: true,
-      forbidNonWhitelisted: true
+      forbidNonWhitelisted: true,
     })
   );
-
-  // normalize imports for runtime interop while keeping TS imports
-
-  const factoryUnknown = connectPgSimple as unknown;
-  let PgSessionCtor: unknown;
-  if (typeof (factoryUnknown as { default?: unknown }).default === "function") {
-    PgSessionCtor = (factoryUnknown as { default: (s: unknown) => unknown }).default(session);
-  } else if (typeof factoryUnknown === "function") {
-    PgSessionCtor = (factoryUnknown as (s: unknown) => unknown)(session);
-  } else {
-    throw new Error("connect-pg-simple import is not a function");
-  }
 
   const dbHost = process.env.DB_HOST ?? "localhost";
   const dbPort = process.env.DB_PORT ?? "5432";
@@ -41,45 +33,43 @@ async function bootstrap(): Promise<void> {
 
   const conString = `postgres://${dbUser}:${dbPassword}@${dbHost}:${dbPort}/${dbName}`;
 
-  // Configure session store with explicit table name and auto-create
-  const sessionStoreOptions: Record<string, unknown> = {
+  // Resolve connect-pg-simple factory (handles CJS/ESM interop)
+  const rawPgSimple = await import("connect-pg-simple");
+  const pgSimpleFactory = (
+    typeof rawPgSimple === "function"
+      ? rawPgSimple
+      : (rawPgSimple as unknown as { default: unknown }).default
+  ) as ConnectPgSimpleFactory;
+
+  const PgStore = pgSimpleFactory(session);
+
+  const store = new PgStore({
     conString,
     tableName: process.env.SESSION_TABLE_NAME ?? "user_sessions",
-    createTableIfMissing: true
-  };
+    createTableIfMissing: true,
+  });
 
-  // create store instance from resolved constructor-like value
-  type PgStoreCtor = new (opts?: Record<string, unknown>) => Record<string, unknown>;
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-  const PgStoreConstructor = PgSessionCtor as unknown as PgStoreCtor;
-
+  app.use(cookieParser());
   app.use(
-    session(
-      {
-        // runtime store constructor; typed as unknown then narrowed
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore: runtime factory
-        store: (new PgStoreConstructor(sessionStoreOptions) as unknown) as import("express-session").Store,
-        secret: sessionSecret,
-        resave: false,
-        saveUninitialized: false,
-        cookie: {
-          maxAge: 1000 * 60 * 30, // 30 minutes
-          httpOnly: true,
-          sameSite: "lax",
-          secure: process.env.NODE_ENV === "production"
-        }
-      } as import("express-session").SessionOptions
-    ) as unknown as import("express").RequestHandler
+    session({
+      store,
+      secret: sessionSecret,
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        maxAge: 1000 * 60 * 30,
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+      },
+    })
   );
 
-  // CSRF middleware for auth routes and attach csrfToken to res.locals for templates
-  app.use('/auth', csrfMiddleware);
-  app.use('/api/admin', csrfMiddleware);
+  app.use("/auth", csrfMiddleware);
+  app.use("/api/admin", csrfMiddleware);
 
-  // Rate limit important endpoints (in-memory limiter)
-  app.use('/auth/login', createRateLimiter({ windowMs: 15 * 60_000, max: 6 }));
-  app.use('/auth/forgot-password', createRateLimiter({ windowMs: 15 * 60_000, max: 3 }));
+  app.use("/auth/login", createRateLimiter({ windowMs: 15 * 60_000, max: 6 }));
+  app.use("/auth/forgot-password", createRateLimiter({ windowMs: 15 * 60_000, max: 3 }));
 
   app.useStaticAssets(join(process.cwd(), "public"));
   app.setBaseViewsDir(join(process.cwd(), "views"));
