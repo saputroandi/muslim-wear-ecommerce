@@ -1,7 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import { randomBytes } from 'crypto';
 
-export function csrfMiddleware(req: Request & { session?: any }, res: Response, next: NextFunction) {
+type CsrfSession = Record<string, unknown> & { csrfToken?: string };
+
+export function csrfMiddleware(req: Request & { session?: CsrfSession }, res: Response, next: NextFunction) {
   // Expose token on GET so templates can embed it
   if (req.method === 'GET' || req.method === 'HEAD') {
     if (req.session) {

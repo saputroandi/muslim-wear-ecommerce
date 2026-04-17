@@ -75,6 +75,7 @@ async function bootstrap(): Promise<void> {
 
   // CSRF middleware for auth routes and attach csrfToken to res.locals for templates
   app.use('/auth', csrfMiddleware);
+  app.use('/api/admin', csrfMiddleware);
 
   // Rate limit important endpoints (in-memory limiter)
   app.use('/auth/login', createRateLimiter({ windowMs: 15 * 60_000, max: 6 }));
