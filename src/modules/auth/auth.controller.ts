@@ -16,8 +16,10 @@ export class AuthController {
 
   @Get("auth/login")
   @Render("auth/login")
-  loginForm(): { error?: string } {
-    return { error: undefined };
+  loginForm(@Req() req: Request): { error?: string } {
+    const reason = (req as any).query?.reason;
+    const error = reason === 'expired' ? 'Sesi berakhir, silakan login ulang' : undefined;
+    return { error };
   }
 
   @Post("auth/login")
