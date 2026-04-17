@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reset Password</title>
+    <link rel="stylesheet" href="/css/design.css" />
+  </head>
+  <body>
+    <main class="section container">
+      <h1 class="section-title">Reset Password</h1>
+      {{#if error}}
+        <div class="card" style="border-left:4px solid #f87171">{{error}}</div>
+      {{/if}}
+      <form method="post" action="/auth/reset-password" style="max-width:420px">
+        <input type="hidden" name="token" value="{{token}}" />
+        <input type="hidden" name="email" value="{{email}}" />
+        <label for="password">Password Baru</label>
+        <input id="password" name="password" type="password" required style="width:100%;padding:8px;margin:8px 0;" />
+        <div style="margin-top:12px">
+          <button class="pill-button primary" type="submit">Reset Password</button>
+        </div>
+      </form>
+    </main>
+  </body>
+</html>

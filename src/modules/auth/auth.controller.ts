@@ -16,8 +16,10 @@ export class AuthController {
 
   @Get("auth/login")
   @Render("auth/login")
-  loginForm(): { error?: string } {
-    return { error: undefined };
+  loginForm(@Req() req: Request): { error?: string } {
+    const reason = (req as any).query?.reason;
+    const error = reason === 'expired' ? 'Sesi berakhir, silakan login ulang' : undefined;
+    return { error };
   }
 
   @Post("auth/login")
@@ -66,6 +68,46 @@ export class AuthController {
     } else {
       return res.redirect("/auth/login");
     }
+  }
+
+  @Get("auth/forgot-password")
+  @Render("auth/forgot")
+  forgotForm(): { error?: string; info?: string } {
+    return { error: undefined, info: undefined };
+  }
+
+  @Post("auth/forgot-password")
+  async forgot(@Body() body: { email: string }, @Res() res: Response) {
+    const { email } = body;
+    const token = await this.authService.createPasswordResetToken(email);
+    // Always respond with generic message
+    if (token) {
+      const base = process.env.APP_BASE_URL ?? `http://localhost:${process.env.APP_PORT ?? 3000}`;
+      console.info(`Password reset link for ${email}: ${base}/auth/reset-password?token=${token}&email=${encodeURIComponent(email)}`);
+    }
+    return res.render('auth/forgot', { info: 'Jika email terdaftar, link reset akan dikirim.' });
+  }
+
+  @Get("auth/reset-password")
+  @Render("auth/reset")
+  resetForm(@Req() req: Request): { error?: string; token?: string; email?: string } {
+    const token = (req as any).query?.token;
+    const email = (req as any).query?.email;
+    return { token, email };
+  }
+
+  @Post("auth/reset-password")
+  async reset(
+    @Body() body: { email: string; token: string; password: string },
+    @Res() res: Response
+  ) {
+    const { email, token, password } = body;
+    const ok = await this.authService.resetPassword(email, token, password);
+    if (!ok) {
+      return res.render('auth/reset', { error: 'Token tidak valid atau sudah kadaluarsa', token, email });
+    }
+
+    return res.render('auth/login', { error: 'Password berhasil direset. Silakan login.' });
   }
 
   @Get("api/auth/starter-status")

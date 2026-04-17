@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Forgot Password</title>
+    <link rel="stylesheet" href="/css/design.css" />
+  </head>
+  <body>
+    <main class="section container">
+      <h1 class="section-title">Reset Password</h1>
+      {{#if info}}
+        <div class="card" style="border-left:4px solid #60a5fa">{{info}}</div>
+      {{/if}}
+      <form method="post" action="/auth/forgot-password" style="max-width:420px">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" required style="width:100%;padding:8px;margin:8px 0;" />
+        <div style="margin-top:12px">
+          <button class="pill-button primary" type="submit">Kirim Link Reset</button>
+        </div>
+      </form>
+    </main>
+  </body>
+</html>
