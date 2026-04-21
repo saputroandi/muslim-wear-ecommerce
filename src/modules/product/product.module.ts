@@ -4,11 +4,14 @@ import { Category } from "./entities/category.entity";
 import { Product } from "./entities/product.entity";
 import { ProductVariant } from "./entities/product-variant.entity";
 import { CategoryController } from "./controllers/category.controller";
+import { ProductController } from "./controllers/product.controller";
 import { CategoryService } from "./services/category.service";
+import { ProductService } from "./services/product.service";
+import { AdminSessionGuard } from "../auth/admin-session.guard";
 
 @Module({
   imports: [TypeOrmModule.forFeature([Category, Product, ProductVariant])],
-  controllers: [CategoryController],
-  providers: [CategoryService]
+  controllers: [CategoryController, ProductController],
+  providers: [AdminSessionGuard, CategoryService, ProductService]
 })
 export class ProductModule {}
