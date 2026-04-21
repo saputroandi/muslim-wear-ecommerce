@@ -3,6 +3,10 @@ import { IsIn, IsInt, IsOptional, IsString, MaxLength, Min } from "class-validat
 import { PRODUCT_SIZES, type ProductSize } from "../entities/product-variant.entity";
 
 export class CreateProductVariantDto {
+  @IsOptional()
+  @IsString()
+  _csrf?: string;
+
   @IsIn(PRODUCT_SIZES)
   size!: ProductSize;
 
