@@ -1,4 +1,5 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm";
+import { OrderItem } from "./order-item.entity";
 
 @Entity({ name: "orders" })
 @Unique(["orderNumber"])
@@ -15,10 +16,12 @@ export class Order {
   @Column({ name: "total_amount_cents", type: "integer" })
   totalAmountCents!: number;
 
+  @OneToMany(() => OrderItem, (item) => item.order)
+  items!: OrderItem[];
+
   @CreateDateColumn({ name: "created_at" })
   createdAt!: Date;
 
   @UpdateDateColumn({ name: "updated_at" })
   updatedAt!: Date;
 }
-

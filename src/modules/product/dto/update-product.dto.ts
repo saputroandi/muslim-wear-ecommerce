@@ -14,6 +14,10 @@ function toBoolean(value: unknown): boolean {
 export class UpdateProductDto {
   @IsOptional()
   @IsString()
+  _csrf?: string;
+
+  @IsOptional()
+  @IsString()
   @MaxLength(100)
   sku?: string;
 

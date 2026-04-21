@@ -12,6 +12,10 @@ function toBoolean(value: unknown): boolean {
 }
 
 export class CreateProductDto {
+  @IsOptional()
+  @IsString()
+  _csrf?: string;
+
   @IsString()
   @MaxLength(100)
   sku!: string;

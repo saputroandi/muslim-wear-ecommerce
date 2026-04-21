@@ -93,6 +93,7 @@ async function bootstrap(): Promise<void> {
   app.use(csrfDebugMiddleware);
 
   app.use("/auth", csrfMiddleware);
+  app.use("/admin", csrfMiddleware);
   app.use("/api/admin", csrfMiddleware);
 
   app.use("/auth/login", createRateLimiter({ windowMs: 15 * 60_000, max: 6 }));

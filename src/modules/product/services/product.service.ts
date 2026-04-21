@@ -18,17 +18,18 @@ export class ProductService {
   ) {}
 
   async create(createProductDto: CreateProductDto): Promise<Product> {
+    const { _csrf, ...payload } = createProductDto;
     await this.assertCategoryExists(createProductDto.categoryId);
     await this.assertProductUniqueness({
-      sku: createProductDto.sku,
-      slug: createProductDto.slug
+      sku: payload.sku,
+      slug: payload.slug
     });
 
     const product = this.productRepository.create({
-      ...createProductDto,
-      imageUrl: createProductDto.imageUrl ?? null,
-      description: createProductDto.description ?? null,
-      isActive: createProductDto.isActive ?? true
+      ...payload,
+      imageUrl: payload.imageUrl ?? null,
+      description: payload.description ?? null,
+      isActive: payload.isActive ?? true
     });
 
     return this.productRepository.save(product);
@@ -69,27 +70,28 @@ export class ProductService {
   }
 
   async update(id: string, updateProductDto: UpdateProductDto): Promise<Product> {
+    const { _csrf, ...payload } = updateProductDto;
     const product = await this.findOne(id);
 
-    if (typeof updateProductDto.categoryId !== "undefined") {
-      await this.assertCategoryExists(updateProductDto.categoryId);
-      product.categoryId = updateProductDto.categoryId;
+    if (typeof payload.categoryId !== "undefined") {
+      await this.assertCategoryExists(payload.categoryId);
+      product.categoryId = payload.categoryId;
     }
 
-    if (typeof updateProductDto.sku !== "undefined" || typeof updateProductDto.slug !== "undefined") {
+    if (typeof payload.sku !== "undefined" || typeof payload.slug !== "undefined") {
       await this.assertProductUniqueness(
         {
-          sku: updateProductDto.sku ?? product.sku,
-          slug: updateProductDto.slug ?? product.slug
+          sku: payload.sku ?? product.sku,
+          slug: payload.slug ?? product.slug
         },
         id
       );
     }
 
     Object.assign(product, {
-      ...updateProductDto,
-      description: typeof updateProductDto.description !== "undefined" ? updateProductDto.description ?? null : product.description,
-      imageUrl: typeof updateProductDto.imageUrl !== "undefined" ? updateProductDto.imageUrl ?? null : product.imageUrl
+      ...payload,
+      description: typeof payload.description !== "undefined" ? payload.description ?? null : product.description,
+      imageUrl: typeof payload.imageUrl !== "undefined" ? payload.imageUrl ?? null : product.imageUrl
     });
 
     return this.productRepository.save(product);
@@ -101,36 +103,38 @@ export class ProductService {
   }
 
   async addVariant(productId: string, variantData: CreateProductVariantDto): Promise<ProductVariant> {
+    const { _csrf, ...payload } = variantData;
     await this.findOne(productId);
     await this.assertVariantUniqueness({
       productId,
-      sku: variantData.sku,
-      size: variantData.size,
-      color: variantData.color
+      sku: payload.sku,
+      size: payload.size,
+      color: payload.color
     });
 
     const variant = this.variantRepository.create({
       productId,
-      size: variantData.size,
-      color: variantData.color,
-      sku: variantData.sku,
-      stock: variantData.stock,
-      reserved: variantData.reserved ?? 0,
-      variantPriceCents: variantData.variantPriceCents ?? null
+      size: payload.size,
+      color: payload.color,
+      sku: payload.sku,
+      stock: payload.stock,
+      reserved: payload.reserved ?? 0,
+      variantPriceCents: payload.variantPriceCents ?? null
     });
 
     return this.variantRepository.save(variant);
   }
 
   async updateVariant(variantId: string, variantData: UpdateProductVariantDto): Promise<ProductVariant> {
+    const { _csrf, ...payload } = variantData;
     const variant = await this.variantRepository.findOne({ where: { id: variantId } });
     if (!variant) {
       throw new BadRequestException(`Variant ${variantId} not found`);
     }
 
-    const nextSku = variantData.sku ?? variant.sku;
-    const nextSize = variantData.size ?? variant.size;
-    const nextColor = variantData.color ?? variant.color;
+    const nextSku = payload.sku ?? variant.sku;
+    const nextSize = payload.size ?? variant.size;
+    const nextColor = payload.color ?? variant.color;
 
     if (nextSku !== variant.sku || nextSize !== variant.size || nextColor !== variant.color) {
       await this.assertVariantUniqueness({
@@ -142,20 +146,31 @@ export class ProductService {
     }
 
     Object.assign(variant, {
-      ...variantData,
-      variantPriceCents: typeof variantData.variantPriceCents !== "undefined" ? variantData.variantPriceCents ?? null : variant.variantPriceCents
+      ...payload,
+      variantPriceCents: typeof payload.variantPriceCents !== "undefined" ? payload.variantPriceCents ?? null : variant.variantPriceCents
     });
 
     return this.variantRepository.save(variant);
   }
 
   async removeVariant(variantId: string): Promise<void> {
-    const variant = await this.variantRepository.findOne({ where: { id: variantId } });
+    await this.findVariantForView(variantId);
+    await this.variantRepository.delete(variantId);
+  }
+
+  async findVariantForView(variantId: string): Promise<ProductVariant> {
+    const variant = await this.variantRepository.findOne({
+      where: { id: variantId },
+      relations: {
+        product: true
+      }
+    });
+
     if (!variant) {
       throw new BadRequestException(`Variant ${variantId} not found`);
     }
 
-    await this.variantRepository.delete(variantId);
+    return variant;
   }
 
   async reserveStock(variantId: string, quantity: number, queryRunner?: QueryRunner): Promise<void> {

@@ -4,6 +4,10 @@ import { PRODUCT_SIZES, type ProductSize } from "../entities/product-variant.ent
 
 export class UpdateProductVariantDto {
   @IsOptional()
+  @IsString()
+  _csrf?: string;
+
+  @IsOptional()
   @IsIn(PRODUCT_SIZES)
   size?: ProductSize;
 
