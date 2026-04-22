@@ -3,35 +3,26 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{appName}} - Produk</title>
-    <link rel="stylesheet" href="/css/design.css" />
+    <title>{{title}} | {{siteName}}</title>
+    <link rel="stylesheet" href="/css/main.css" />
   </head>
   <body>
-    <header class="nav">
-      <div class="container nav-inner">
-        <a class="brand" href="/">{{appName}}</a>
-        <nav class="nav-links">
-          <a href="/products">Produk</a>
-          <a href="/admin">Admin</a>
-          <a href="/health">Health</a>
-        </nav>
-        <a class="pill-button secondary" href="/">Kembali</a>
-      </div>
-    </header>
+    <main class="page">
+      <header class="page-header">
+        <p class="eyebrow">Catalog</p>
+        <h1>Koleksi produk</h1>
+        <a class="button button-secondary" href="/">Kembali ke home</a>
+      </header>
 
-    <main class="section container">
-      <span class="badge">Catalog preview</span>
-      <h1 class="section-title">Katalog Produk (Starter)</h1>
-      <p class="subtitle">Halaman ini baru menampilkan contoh data. Fitur filter/search/variant akan diimplementasikan pada phase roadmap.</p>
-      <div class="cards">
-        {{#each featuredProducts}}
+      <section class="card-grid">
+        {{#each products}}
           <article class="card">
-            <p class="badge">{{this.category}}</p>
-            <h3>{{this.name}}</h3>
-            <p class="muted">{{this.priceLabel}}</p>
+            <p class="card-title">{{name}}</p>
+            <p class="card-price">{{price}}</p>
+            <p class="card-copy">{{description}}</p>
           </article>
         {{/each}}
-      </div>
+      </section>
     </main>
   </body>
 </html>

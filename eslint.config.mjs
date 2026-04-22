@@ -1,27 +1,25 @@
 import js from "@eslint/js";
-import tseslint from "typescript-eslint";
 
-export default tseslint.config(
+export default [
   {
-    ignores: ["dist/**", "node_modules/**", "coverage/**"]
+    ignores: ["node_modules/**", "dist/**", "coverage/**"]
   },
   js.configs.recommended,
-  ...tseslint.configs.recommendedTypeChecked,
   {
-    files: ["**/*.ts"],
+    files: ["src/**/*.js"],
     languageOptions: {
-      parserOptions: {
-        projectService: true,
-        tsconfigRootDir: import.meta.dirname
+      ecmaVersion: "latest",
+      sourceType: "commonjs",
+      globals: {
+        console: "readonly",
+        process: "readonly",
+        __dirname: "readonly",
+        module: "readonly",
+        require: "readonly"
       }
     },
     rules: {
-      "@typescript-eslint/no-floating-promises": "error",
-      "@typescript-eslint/no-misused-promises": "error",
-      "@typescript-eslint/no-unsafe-assignment": "off",
-      "@typescript-eslint/no-unsafe-call": "off",
-      "@typescript-eslint/no-unsafe-member-access": "off",
-      "@typescript-eslint/no-unsafe-return": "off"
+      "no-unused-vars": ["error", { argsIgnorePattern: "^_" }]
     }
   }
-);
+];
