@@ -1,9 +1,0 @@
-services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: muslim-wear-app
-    env_file: .env
-    ports:
-      - "3000:3000"
