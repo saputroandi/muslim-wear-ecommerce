@@ -1,0 +1,44 @@
+# Compiled output
+/dist
+/node_modules
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Env files (Sangat penting agar data sensitif tidak ter-upload)
+.env
+.env.development
+.env.production
+.env.local
+.env.*.local
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Testing
+/coverage
+/.nyc_output
+
+# TypeScript
+*.tsbuildinfo
+
+# Optional: Docker
+.dockerignore
